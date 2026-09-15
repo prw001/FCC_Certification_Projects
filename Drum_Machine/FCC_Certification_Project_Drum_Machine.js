@@ -23,8 +23,7 @@ function handleKeyButtonPress(event)
     const key = event.code.slice(3);
     if (Object.keys(descriptions).includes(key))
     {
-        const src = document.getElementById(key);
-        handleAudio(key, src);
+        handleAudio(key);
     }
     else
     {
@@ -39,11 +38,10 @@ function handleKeyButtonPress(event)
 function handleTriggerButtonPress(event)
 {
     const key = event.currentTarget.innerText;
-    const src = document.getElementById(key).src;
-    handleAudio(key, src);
+    handleAudio(key);
 }
 
-function handleAudio(key, src)
+function handleAudio(key)
 {
     clearDisplay();
     audio.pause();
@@ -51,12 +49,12 @@ function handleAudio(key, src)
     currentAudio.id = key;
     currentAudio.currentTime = 0;
     updateDisplay();
-    playAudio(src);
+    playAudio(key);
 }
 
-const playAudio = (src) => {
-    audio.src = src;
-    audio.play();
+const playAudio = (key) => {
+    const audioElement = document.getElementById(key);
+    audioElement.play();
 }
 
 const updateDisplay = () => {
