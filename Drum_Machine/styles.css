@@ -1,0 +1,50 @@
+#drum-machine {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: midnightblue;
+    border-radius: .5em;
+    padding: 20px;
+    padding-top: 60px;
+    width: 300px;
+}
+
+#display {
+  min-height: 30px;
+  min-width: 100%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  background: #2E2E2E;
+  border-radius: .2em;
+  color: azure;
+}
+
+#title {
+  min-height: 30px;
+  min-width: 100%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  background: lightblue;
+  border: 3px;
+  border-color: seagreen;
+  border-radius: .2em;
+  font: 1.5rem "Fira Sans",
+    sans-serif;
+}
+.drum-pad {
+  display: flex-row;
+  width: 70px;
+  height: 70px;
+  border: 3px dashed lightgray;
+  border-spacing: 5px 1rem;
+  border-radius: 0.5em;
+  background: seagreen;
+  color: azure;
+  font: 1.2rem "Fira Sans",
+    sans-serif;
+  justify-content: center;
+  align-items: center;
+  padding: 10px
+}
