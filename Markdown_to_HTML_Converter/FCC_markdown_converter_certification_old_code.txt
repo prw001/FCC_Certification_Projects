@@ -1,0 +1,356 @@
+const markdownInput = document.getElementById("markdown-input");
+const htmlOutputField = document.getElementById("html-output");
+const htmlPreview = document.getElementById("preview");
+const boldRegex = /[\*|_]{2}[^*_]{1,}[\*|_]{2}/;
+const italicRegex = /[\*|_]{1}[^*_]{1,}[\*|_]{1}/;
+const headerRegex = /^#+\sw*/;
+const imgRegex = /^!\[(.*?)]\(.*?\)/;
+const linkRegex = /^\[.*?]\(.*?\)/;
+const blockquoteRegex = /^\s*>\s\w*/;
+const leftCheckRegex = /^(?<=\.*?)(>|#{1})/;
+const lineSplitRegex = /^(?<=\.*?)(?=>>|#+|!|[])/;
+
+function convertMarkdown()
+{
+  let outputHTML = "";
+  let node;
+  const mdInput = markdownInput.value;
+  const textArr = mdInput.split(lineSplitRegex);
+  console.log(textArr);
+
+  //will need to add another outer loop here to loop through
+  //each item in textArr
+  for (let i = 0; i < textArr.length; ++i)
+  {
+    for (let j = 0; j < textArr[i].length; ++j)
+    {
+      let currentChar = textArr[i][j];
+      if (textArr[i][j] === " ")
+      {
+        outputHTML += " ";
+      }
+      else
+      {
+        switch(currentChar)
+        {
+          case "#":
+          if (leftCheckRegex.test(textArr[i]))
+            {
+              let k = 0;
+              do {
+                k += 1
+              } while (textArr[j][k] === "#");
+              j = k;
+              outputHTML += generateHeading(k, textArr[i].slice(j));
+              j = textArr[i].length - 1;
+            }
+            else
+            {
+              outputHTML += textArr[i][j];
+            }
+            break;
+          case "_":
+          case "*":
+            if (boldRegex.test(textArr[i].slice(j)))
+            {
+              let adjIdx = 0;
+              outputHTML += generateItalicBold(textArr[i].slice(j));
+              adjIdx = textArr[i].lastIndexOf("**");
+              if (adjIdx < 0) adjIdx = textArr[i].slice(j).lastIndexOf("__");
+              if (adjIdx > 0) j = adjIdx + 1;
+            }
+            else if (italicRegex.test(textArr[i].slice(j)))
+            {
+              let adjIdx = 0;
+              outputHTML += generateItalicBold(textArr[i].slice(j));
+              adjIdx = textArr[0].lastIndexOf("*");
+              if (adjIdx < 0) adjIdx = textArr[i].slice(j).lastIndexOf("_");
+              if (adjIdx > 0) j = adjIdx;
+            }
+            else
+            {
+              outputHTML += textArr[i][j];
+            }
+            break;
+          case "!":
+            outputHTML += generateImg(textArr[i].slice(j));
+            j = textArr[i].length - 1;
+            break;
+          case "[":
+            outputHTML += generateLink(textArr[i].slice(j));
+            j = textArr[i].length - 1;
+            break;
+          case ">":
+            if (leftCheckRegex.test(textArr[i]))
+            {
+              outputHTML += generateQuote(textArr[i].slice(j));
+              j = textArr[i].length - 1;
+            }
+            else
+            {
+              outputHTML += textArr[i][j];
+            }
+            break;
+          default:
+            if (j < textArr[i].length)
+            {
+              outputHTML += textArr[i][j];
+            }
+            break;
+        }
+      }
+    }
+  }
+  console.log(outputHTML);
+  htmlOutputField.textContent = outputHTML === "" ? mdInput : outputHTML;
+  return outputHTML;
+}
+
+function hasMoreHTML(text)
+{
+  return (boldRegex.test(text) ||
+          italicRegex.test(text) ||
+          headerRegex.test(text) ||
+          imgRegex.test(text) ||
+          linkRegex.test(text) ||
+          blockquoteRegex.test(text));
+}
+
+function getNextGenerator(text)
+{
+  if(boldRegex.test(text) || italicRegex.test(text))
+  {
+    return generateItalicBold;
+  }
+  else if(headerRegex.test(text))
+  {
+    return generateHeading;
+  }
+  else if(imgRegex.test(text))
+  {
+    return generateIMG;
+  }
+  else if(linkRegex.test(text))
+  {
+    return generateLink;
+  }
+  else if(blockquoteRegex.test(text))
+  {
+    return generateQuote;
+  }
+  return null;
+}
+
+function generateHeading(headingLevel, text)
+{
+  let html = `<h${headingLevel}>`;
+  if (hasMoreHTML(text.trim()))
+  {
+    let func = getNextGenerator(text.trim());
+    if (func) html += func(text.trim());
+  }
+  else
+  {
+    html += text.trim();
+  }
+  html += `</h${headingLevel}>`;
+  return html;
+}
+
+function generateItalicBold(text)
+{
+  let html = ``;
+  let firstMark = text.indexOf("*");
+  if (firstMark == -1) 
+  {
+    firstMark = text.indexOf("_");
+    if (firstMark == -1) return;
+  }
+  if (firstMark > 0)
+  {
+    html += text.slice(0, firstMark);
+    html += generateItalicBold(text.slice(firstMark));
+  }
+  else
+  {
+    if (boldRegex.test(text))
+    {
+      let boldSelected = boldRegex.exec(text)[0];
+      boldSelected = boldSelected.slice(2, boldSelected.length - 2);
+      html += `<strong>`;
+      if (hasMoreHTML(boldSelected))
+      {
+        const func = getNextGenerator(boldSelected);
+        if (func) html += func(boldSelected);
+        html += `</strong>`;
+      }
+      else
+      {
+        html += `${boldSelected}</strong>`;
+      }
+    }
+    else if (italicRegex.test(text))
+    {
+      let italicSelected = italicRegex.exec(text)[0];
+      italicSelected = italicSelected.slice(1, italicSelected.length - 1);
+      html += `<em>`;
+      if (hasMoreHTML(italicSelected))
+      {
+        const func = getNextGenerator(italicSelected);
+        if (func) html += func(italicSelected);
+        html += `</em>`;
+      }
+      else
+      {
+        html += `${italicSelected}</em>`;
+      }
+    }
+  }
+  return html;
+}
+
+
+function generateImg(text)
+{
+  //selects entire alt-text chunk: ![alt-text](
+  const altRegex = /^!\[(.*?)]\(/;
+  let altSelected = altRegex.exec(text)[0];
+  altSelected = altSelected.slice(2, altSelected.length - 2);
+  //selects entire src text chunk: ](image-source)
+  const srcRegex = /(\]\(.*?\))/;
+  let srcSelected = srcRegex.exec(text)[0];
+  srcSelected = srcSelected.slice(2, srcSelected.length - 1);
+  return `<img alt="${altSelected}" src="${srcSelected}">`;
+}
+
+function generateLink(text)
+{
+  //functions the same as generateImg() but without searching
+  //for the initial '!'
+  const textRegex = /^\[(.*?)]\(/;
+  const urlRegex = /\]\(.*?\)/;
+  let textSelected = textRegex.exec(text)[0];
+  textSelected = textSelected.slice(1, textSelected.length - 2);
+  let urlSelected = urlRegex.exec(text)[0];
+  urlSelected = urlSelected.slice(2, urlSelected.length - 1);
+  return `<a href="${urlSelected}>${textSelected}</a>`;
+}
+
+function generateQuote(text)
+{
+  let quote = text.slice(2);
+  let html = `<blockquote>`;
+  if (hasMoreHTML(quote))
+  {
+    const func = getNextGenerator(quote);
+    if (func)
+    {
+      html += func(quote);
+    }
+  }
+  else
+  {
+    html += quote;
+  }
+  html += `</blockquote>`;
+  return html;
+}
+
+//old, don't use
+function convertMarkdown2()
+{
+  let outputHTML = "";
+  const mdInput = markdownInput.value;
+  const boldRegex = /(\*{2}|_{2}).*?(\*{2}|_{2})/;
+  const italicRegex = /(\*{1}|_{1}).*?(\*{1}|_{1})/;
+  const headerRegex = /^#+\s\w*/;
+  const imgRegex = /^!\[(.*?)]\(.*?\)/;
+  const linkRegex = /^\[.*?]\(.*?\)/;
+  const blockquoteRegex = /^\s*>\s\w*/;
+
+  const textArr = mdInput.split("\n");
+
+  textArr.forEach(line => {
+    if (headerRegex.test(line))
+    {
+      const headingLevel = line.match(/#/g).length;
+      outputHTML += generateHeader([headingLevel, line.slice(headingLevel + 1)]);
+    }
+    if (italicRegex.test(line))
+    {
+      if (boldRegex.test(line))
+      {
+        const strippedText = line.replaceAll(/(\*\*|__)/g, "");
+        outputHTML += generateBoldText(strippedText);
+      }
+      else
+      {
+        const strippedText = line.replaceAll(/(^\*|_){1}/g, "");
+        outputHTML += generateItalicText(strippedText);
+      }
+    }
+    if (imgRegex.test(line))
+    {
+      const altTextArr = line.match(/!(\[.*?])/);
+      const altText = altTextArr[0].replace(/(!\[|])/g, "");
+
+      const srcTextArr = line.match(/(\(.*?\))/);
+      const srcText = srcTextArr[0].replace(/^\(|\)$/g, "");
+
+      outputHTML += generateImgHTML([srcText, altText]);
+    }
+    if (linkRegex.test(line))
+    {
+      const linkTextArr = line.match(/(\[.*?])/);
+      const linkText = linkTextArr[0].replace(/(^\[{1}|]{1})/g, "");
+
+      const srcTextArr = line.match(/(\(.*?\))/);
+      const srcText = srcTextArr[0].replace(/^\(|\)/g, "");
+
+      outputHTML += generateLinkHTML([srcText, linkText]);
+    }
+    if (blockquoteRegex.test(line))
+    {
+      const quoteText = line.replace(/(>\s)/, "");
+      outputHTML += generateBlockQuoteHTML(quoteText);
+    }
+  });
+
+  htmlOutputField.textContent = outputHTML === "" ? mdInput : outputHTML;
+
+  return outputHTML;
+
+}
+
+function generateHeader(input)
+{
+  return `<h${input[0]}>${input[1]}</h${input[0]}>`;
+}
+
+function generateBoldText(input)
+{
+  return `<strong>${input}</strong>`;
+}
+
+function generateItalicText(input)
+{
+  return `<em>${input}</em>`;
+}
+
+function generateImgHTML(input)
+{
+  return `<img src="${input[0]}" alt="${input[1]}" />`
+}
+
+function generateLinkHTML(input)
+{
+  return `<a href="${input[0]}">${input[1]}</a>`;
+}
+
+function generateBlockQuoteHTML(input)
+{
+  return `<blockquote>${input}</blockquote>`;
+}
+
+markdownInput.addEventListener("input",
+  convertMarkdown)
