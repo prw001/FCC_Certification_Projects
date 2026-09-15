@@ -20,14 +20,10 @@ let currentAudio = {
 
 function handleKeyButtonPress(event)
 {
-    const key = event.code.slice(3);
+    const key = event.key.toUpperCase();
     if (Object.keys(descriptions).includes(key))
     {
         handleAudio(key);
-    }
-    else
-    {
-        clearDisplay();
     }
 }
 
@@ -67,7 +63,7 @@ const clearDisplay = () => {
 
 const clearCurrentAudio = () => {
     currentAudio.id = null;
-    currentTime = 0;
+    currentAudio.currentTime = 0;
     clearDisplay();
 }
 
@@ -76,4 +72,4 @@ audio.addEventListener("ended", clearCurrentAudio);
 triggerBtns.forEach((button) => {
     button.addEventListener("click", handleTriggerButtonPress);
 });
-document.addEventListener("keyup", handleKeyButtonPress);
+document.addEventListener("keydown", handleKeyButtonPress);
