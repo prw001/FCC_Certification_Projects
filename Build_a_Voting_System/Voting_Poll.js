@@ -41,7 +41,8 @@ const displayResults = () => {
     let resultText = `Poll Results:\n`;
     Array.from(poll.keys()).forEach(key => {
         resultText += `${key}: ${poll.get(key).size} votes\n`;
-    })
+    });
+    resultText = resultText.slice(0, resultText.length - 1); // removes final \n
     return resultText;
 }
 
