@@ -35,3 +35,11 @@ const vote = (option, voterId) => {
         }
     }
 }
+
+const displayResults = () => {
+    let resultText = `Poll Results:\n`;
+    poll.keys.forEach(key => {
+        resultText += `key: ${poll.get(key).size} votes\n`;
+    })
+    return resultText;
+}
