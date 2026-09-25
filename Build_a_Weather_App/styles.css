@@ -1,0 +1,33 @@
+#main-container {
+    background-color: darkslategray;
+    padding: 20px;
+}
+
+#weather-display {
+    background-color: silver;
+    border-radius: 5px navy;
+    padding: 5%;
+    justify-self: center;
+    justify-items: center;
+}
+
+#weather-select-container {
+    background-color: silver;
+    border-radius: 5px navy;
+    padding: 5%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#get-weather-button {
+    border-radius: 2px navy;
+    size-adjust: flex;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: medium;
+    background-color: aqua;
+}
+
+#select-dropdown {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: small;
+    background-color: lightgray;
+}
