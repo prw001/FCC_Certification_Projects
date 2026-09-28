@@ -3,8 +3,35 @@
   <head>
     <meta charset="utf-8" />
     <title>Weather App</title>
+    <link rel="stylesheet" href="styles.css">
   </head>
 
-  <body></body>
+  <body>
+    <div id="main-container">
+      <div id="weather-display">
+        <img src="" alt="weather icon" id="weather-icon">
+        <span id="main-temperature">Main Temp:</span>
+        <span id="feels-like">Feels Like:</span>
+        <span id="humidity">Humidity:</span>
+        <span id="wind">Wind Speed:</span>
+        <span id="wind-gust">Wind Gust:</span>
+        <span id="weather-main">Weather Conditions:</span>
+        <span id="location">Location:</span>
+      </div>
+      <div id="weather-select-container">
+        <span>Weather for:</span>
+        <select name="city-options" id="city-options">
+          <option value="">--Choose a location--</option>
+          <option value="new york">New York</option>
+          <option value="los angeles">Los Angeles</option>
+          <option value="chicago">Chicago</option>
+          <option value="paris">Paris</option>
+          <option value="tokyo">Tokyo</option>
+          <option value="london">London</option>
+        </select>
+        <button id="get-weather-button" type="submit">Get Weather</button>
+      </div>
+    </div>
+  </body>
   <script src="Weather_App.js"></script>
 </html>
