@@ -1,5 +1,5 @@
 //doc elements
-const getWeatherButton = document.getElementById("get-weather-button");
+const getWeatherButton = document.getElementById("get-weather-btn");
 const options = document.getElementById("city-options");
 const weatherDisplay = document.getElementById("weather-display");
 const weatherSelect = document.getElementById("weather-select-container");
@@ -21,10 +21,18 @@ async function getWeather(city)
 {
     const url = weatherInfo + city;
     try{ const res = await fetch(url);
-         const data = await res.json();
-         return data;
+         if(res.ok)
+         {
+            const data = await res.json();
+            return data;
+         }
+         else
+         {
+            alert("Something went wrong, please try again later");
+            return;
+         }
     } catch(err) {
-        alert("Something went wrong, please try again later");
+        console.error(err);
         return;
     }
 }
@@ -32,27 +40,30 @@ async function getWeather(city)
 async function showWeather(city)
 {
     const data = await getWeather(city);
-    await updateWeatherHTML(data);
+    if (data)
+    {
+        await updateWeatherHTML(data);
+    }
+    return;
 }
 
 async function updateWeatherHTML(data)
 {
-    //need to fix this, the IMG update is not working for some weird reason.
-    let iconHTML = weatherIcon;
-    weatherDisplay.innerHTML = "";
-    const wIconHTML = `<img src="${data.weather[0].icon}" alt="${description} icon" />`;
-    const mainTempHTML = `<span id="main-temperature">Main Temp: ${data.main.temp} C</span>`;
-    const feelsLikeHTML = `<span id="feels-like">Feels Like: ${data.main.feelsLike} C</span>`;
-    const humidityHTML = `<span id="humidity">Humidity: ${data.main.humidity}%</span>`;
-    const windSpeedHTML = `<span id="wind">Wind Speed: ${data.wind.speed} m/s</span>`;
-    const windGustHTML = `<span id="wind-gust">Wind Gust: ${data.wind.gust} m/s</span>`;
-    const weatherMainHTML = `<span id="weather-main">Weather Conditions: ${data.weather[0].description}</span>`;
+    weatherDisplay.innerHTML = ``;
+    const wIconHTML = `<img src="${data.weather[0].icon}" alt="weather-icon" id="weather-icon" width="60" height="60"/>`;
+    const mainTempHTML = `<span id="main-temperature">Main Temp: ${data.main.temp ? data.main.temp + ' C' : 'N/A'}</span>`;
+    const feelsLikeHTML = `<span id="feels-like">Feels Like: ${data.main.feels_like ? data.main.feels_like + ' C' : 'N/A'}</span>`;
+    const humidityHTML = `<span id="humidity">Humidity: ${data.main.humidity ? data.main.humidity + '%' : 'N/A'}</span>`;
+    const windSpeedHTML = `<span id="wind">Wind Speed: ${data.wind.speed ? data.wind.speed + ' m/s' : 'N/A'}</span>`;
+    const windGustHTML = `<span id="wind-gust">Wind Gust: ${data.wind.gust ? data.wind.gust + ' m/s' : 'N/A'}</span>`;
+    const weatherMainHTML = `<span id="weather-main">Weather Conditions: ${data.weather[0].description ? data.weather[0].description : 'N/A'}</span>`;
     const locationHTML = `<span id="location">Location: ${data.name}</span>`;
 
     weatherDisplay.innerHTML += wIconHTML + mainTempHTML + feelsLikeHTML + humidityHTML + windSpeedHTML +
                                windGustHTML + weatherMainHTML + locationHTML;
     return;
 }
+
 
 //event listeners
 getWeatherButton.addEventListener("click", (e) => {
@@ -64,30 +75,3 @@ getWeatherButton.addEventListener("click", (e) => {
     }
     showWeather(options.value);
 });
-
-/* weather output format:
-{
-  "weather": [
-    {
-      "main": "Clear",
-      "description": "clear sky",
-      "icon": "https://cdn.freecodecamp.org/weather-icons/01n.png" // icon representing the weather
-    }
-  ],
-  "main": {
-    "temp": 2.62, // temperature in C
-    "feels_like": 0.84, // temperature in C
-    "temp_min": 1.72, // min temperature of the day in C
-    "temp_max": 3.49, // max temperature of the day in C
-    "pressure": 1010, // atmospheric pressure in hPa
-    "humidity": 81 // humidity in %
-  },
-  "visibility": 10000, // distance in meters
-  "wind": {
-    "speed": 1.79, // speed of the wind in m/s
-    "deg": 285, // orientation of the wind in degrees
-    "gust": 3.13 // gust speed in m/s
-  },
-  "name": "London"
-}
-*/
